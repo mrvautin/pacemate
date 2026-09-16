@@ -13,6 +13,8 @@ PaceMate shows exactly what you need, when you need it:
 
 No clutter, no digging through menus mid-race — just the numbers that matter, laid out clearly so you can check your progress with a glance at your wrist.
 
+<img src="resources/images/ahead-target.png" width="220" alt="PaceMate data field showing current pace, target pace, ahead/behind delta, and projected finish time">
+
 ## Setup
 
 ### 1. Install
@@ -45,6 +47,8 @@ Fully configurable, right on your watch. Set your race distance, target finish t
 | Race Distance | e.g. 5K, 10K, half marathon, or any custom distance |
 | Finish Time   | your goal time, set in hours / minutes / seconds    |
 | Units         | kilometers or miles                                 |
+
+<img src="resources/images/settings-screen.png" width="220" alt="PaceMate settings menu on the watch showing Race Distance, Finish Time, and Units">
 
 **From your phone:** prefer to set it up beforehand? Open Garmin Connect Mobile → **Devices** → your watch → **Data Fields / Connect IQ Store** → PaceMate → **Settings**, and enter the same three values. Changes sync to the watch automatically.
 
