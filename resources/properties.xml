@@ -1,0 +1,27 @@
+<resources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
+
+    <!--
+        Shared property definitions for PaceMateField and PaceMateWidget.
+        Both apps declare the SAME property ids/types here so their
+        values interoperate: Garmin Connect Mobile, Garmin Express, and
+        each app's own on-device settings all read/write the same keys.
+        Canonical units: distance in meters, time in seconds.
+    -->
+    <properties>
+        <property id="raceDistanceM" type="float">5000.0</property>
+        <property id="finishTimeSec" type="number">1800</property>
+        <property id="distanceUnits" type="number">0</property>
+
+        <!--
+            Phone-facing mirrors of the canonical properties above, shown
+            in Garmin Connect Mobile/Express (which can only show plain
+            numeric fields, not the on-watch H/M/S or unit-aware pickers).
+            raceDistanceDisplay is in whichever unit distanceUnits selects
+            (km or miles); finishTimeMin is in minutes. AppBase.onSettingsChanged()
+            converts these into the canonical meters/seconds properties.
+        -->
+        <property id="raceDistanceDisplay" type="float">5.0</property>
+        <property id="finishTimeMin" type="number">30</property>
+    </properties>
+
+</resources>

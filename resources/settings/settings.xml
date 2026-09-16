@@ -1,0 +1,27 @@
+<resources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
+
+    <!--
+        Phone-side settings (Garmin Connect Mobile / Garmin Express).
+        These edit the *display* properties (raceDistanceDisplay in
+        whichever unit distanceUnits selects, finishTimeMin in minutes) -
+        AppBase.onSettingsChanged() converts them into the canonical
+        raceDistanceM/finishTimeSec properties the watch app actually uses.
+    -->
+    <settings>
+        <setting propertyKey="@Properties.distanceUnits" title="@Strings.unitsTitle">
+            <settingConfig type="list">
+                <listEntry value="0">@Strings.unitsKm</listEntry>
+                <listEntry value="1">@Strings.unitsMiles</listEntry>
+            </settingConfig>
+        </setting>
+
+        <setting propertyKey="@Properties.raceDistanceDisplay" title="@Strings.distanceTitle">
+            <settingConfig type="numeric" />
+        </setting>
+
+        <setting propertyKey="@Properties.finishTimeMin" title="@Strings.finishTimeTitle">
+            <settingConfig type="numeric" />
+        </setting>
+    </settings>
+
+</resources>
