@@ -54,26 +54,32 @@ Fully configurable, right on your watch. Set your race distance, target finish t
 
 **From your phone:** prefer to set it up beforehand? Open Garmin Connect Mobile → **Devices** → your watch → **Data Fields / Connect IQ Store** → PaceMate → **Settings**, and enter the same three values. Changes sync to the watch automatically.
 
-**Choosing which fields show:** which fields appear on screen, and how sensitive Current Pace is to GPS noise, is configured from your phone only — Garmin Connect Mobile/Express → **Devices** → your watch → **Data Fields / Connect IQ Store** → PaceMate → **Settings**. Every setting there shows a short description of what it does underneath its title.
+**Choosing which fields show:** which fields appear on screen, and how sensitive Current Pace is to GPS noise, is configured from your phone only — Garmin Connect Mobile/Express → **Devices** → your watch → **Data Fields / Connect IQ Store** → PaceMate → **Settings**.
 
-| Field              | Default |
-| ------------------ | ------- |
-| Current Pace       | always on |
-| Average Pace       | on      |
-| Km/Mi Split Pace   | off     |
-| Target Pace        | off     |
-| Ahead/Behind       | on      |
-| Projected Finish   | on      |
+| Field | Default | Description |
+| ----- | ------- | ----------- |
+| Current Pace | always on | Your real-time pace, smoothed over the Pace Smoothing distance below. |
+| Average Pace | on | Your average pace across the whole activity so far, from the start of the run to now. |
+| Km/Mi Split Pace | off | Your live pace for the km or mile you're currently in — resets and starts timing fresh every time you complete one. |
+| Target Pace | off | The pace you need to hold to hit your goal finish time, worked out from Race Distance and Finish Time. |
+| Ahead/Behind | on | How far ahead of or behind your target pace you're currently running, updated live. Green means ahead, red means behind. Compares against target pace even if Target Pace itself is hidden. |
+| Projected Finish | on | Your estimated finish time if you keep running at your current pace — a live "if you keep this up" estimate, not a fixed prediction from your goal. |
 
 Turn a field off and the remaining fields grow to fill the space, so the layout stays balanced whatever combination you pick.
 
-**Pace Smoothing:** Current Pace is averaged over a short rolling distance rather than raw instantaneous GPS speed, so it doesn't jump around under trees or between buildings. This is also phone-configured, as a choice of 50m (more responsive, more jitter), 100m (default), or 200m (smoother, slower to react).
+**Pace Smoothing:** Current Pace is averaged over a short rolling distance rather than raw instantaneous GPS speed, so it doesn't jump around under trees or between buildings. This is also phone-configured:
+
+| Option | Description |
+| ------ | ----------- |
+| 50 m | More responsive to pace changes, but shows more raw GPS jitter. |
+| 100 m | Default — a balance of responsiveness and smoothness. |
+| 200 m | Smoother reading, but slower to catch real pace changes. |
 
 ### 4. Run
 
 Start your activity as normal. Current pace needs some GPS-tracked movement (per the Pace Smoothing distance above) to settle into a steady reading — that's by design, so it reflects your real recent pace rather than jumpy instantaneous GPS speed.
 
-The Ahead/Behind delta turns green when you're running faster than target pace and red when you're slower — this compares against your target pace even if the Target Pace field itself is turned off. Km/Mi Split Pace resets and starts timing fresh every time you complete a km or mile, so it always shows your live pace for the unit you're currently in. Projected Finish updates continuously from your current pace, so it's a live "if you keep this up" estimate.
+See the field table above for what each value on screen means.
 
 Whether you're chasing a PB, pacing a training run, or just want a clearer view of how the race is unfolding, PaceMate keeps you focused on what matters: hitting your target.
 
