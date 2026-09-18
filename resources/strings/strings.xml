@@ -2,11 +2,16 @@
     <string id="AppName">PaceMate</string>
     <string id="distanceTitle">Distance (km or mi)</string>
     <string id="finishTimeTitle">Finish Time (minutes)</string>
-    <string id="unitsTitle">Distance Units</string>
+    <string id="unitsTitle">Distance Units (km or mi)</string>
     <string id="unitsKm">Kilometers</string>
     <string id="unitsMiles">Miles</string>
-    <string id="showTargetTitle">Show Target Pace</string>
-    <string id="showDeltaTitle">Show Ahead/Behind</string>
-    <string id="showFinishTitle">Show Projected Finish</string>
-    <string id="showAverageTitle">Show Average Pace</string>
+    <string id="showTargetTitle">Show Target Pace (pace needed to hit your goal)</string>
+    <string id="showDeltaTitle">Show Ahead/Behind (vs. target pace, live)</string>
+    <string id="showFinishTitle">Show Projected Finish (at current pace)</string>
+    <string id="showAverageTitle">Show Average Pace (whole activity so far)</string>
+    <string id="showSplitTitle">Show Km/Mi Split Pace (current km/mile, live)</string>
+    <string id="paceSmoothingTitle">Pace Smoothing (distance Current Pace averages over)</string>
+    <string id="smoothing50">50 m - more responsive, more GPS jitter</string>
+    <string id="smoothing100">100 m - default</string>
+    <string id="smoothing200">200 m - smoother, slower to react</string>
 </resources>

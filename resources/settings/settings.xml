@@ -38,6 +38,18 @@
         <setting propertyKey="@Properties.showAveragePace" title="@Strings.showAverageTitle">
             <settingConfig type="boolean" />
         </setting>
+
+        <setting propertyKey="@Properties.showSplitPace" title="@Strings.showSplitTitle">
+            <settingConfig type="boolean" />
+        </setting>
+
+        <setting propertyKey="@Properties.paceSmoothingM" title="@Strings.paceSmoothingTitle">
+            <settingConfig type="list">
+                <listEntry value="50">@Strings.smoothing50</listEntry>
+                <listEntry value="100">@Strings.smoothing100</listEntry>
+                <listEntry value="200">@Strings.smoothing200</listEntry>
+            </settingConfig>
+        </setting>
     </settings>
 
 </resources>

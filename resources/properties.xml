@@ -34,6 +34,15 @@
         <property id="showDelta" type="boolean">true</property>
         <property id="showProjectedFinish" type="boolean">true</property>
         <property id="showAveragePace" type="boolean">true</property>
+        <property id="showSplitPace" type="boolean">false</property>
+
+        <!--
+            Current-pace smoothing window, in meters. Phone-configured
+            only - it's a display-smoothing preference, not a race
+            parameter, so it doesn't belong on the watch's own race-setup
+            menu (Race Distance / Finish Time / Units).
+        -->
+        <property id="paceSmoothingM" type="number">100</property>
     </properties>
 
 </resources>

@@ -16,6 +16,8 @@ module PaceMateCalc {
     const PROP_SHOW_DELTA = "showDelta";
     const PROP_SHOW_FINISH = "showProjectedFinish";
     const PROP_SHOW_AVERAGE = "showAveragePace";
+    const PROP_SHOW_SPLIT = "showSplitPace";
+    const PROP_PACE_SMOOTHING_M = "paceSmoothingM";
 
     enum {
         UNITS_KM = 0,
@@ -64,6 +66,23 @@ module PaceMateCalc {
     function getShowAveragePace() as Boolean {
         var v = Properties.getValue(PROP_SHOW_AVERAGE);
         return (v == null) ? true : v;
+    }
+
+    function getShowSplitPace() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_SPLIT);
+        return (v == null) ? false : v;
+    }
+
+    // Distance between rolling current-pace checkpoints, in meters -
+    // smaller reacts faster but shows more raw GPS jitter, larger is
+    // smoother but laggier. Phone-configured only, since it's a
+    // display-smoothing preference, not a race parameter.
+    function getPaceSmoothingM() as Float {
+        var v = Properties.getValue(PROP_PACE_SMOOTHING_M);
+        if (v == null || v <= 0) {
+            return 100.0;
+        }
+        return v.toFloat();
     }
 
     function setRaceDistanceM(meters as Float) as Void {

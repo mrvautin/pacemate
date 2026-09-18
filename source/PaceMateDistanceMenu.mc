@@ -1,7 +1,7 @@
 import Toybox.Lang;
 import Toybox.WatchUi;
 
-// Common race distances plus a custom option that opens a number picker.
+// Common race distances plus a custom option that opens a value menu.
 class PaceMateDistanceMenu extends WatchUi.Menu2 {
     public function initialize() {
         Menu2.initialize({:title => "Race Distance"});
@@ -33,7 +33,7 @@ class PaceMateDistanceMenuDelegate extends WatchUi.Menu2InputDelegate {
             PaceMateCalc.setRaceDistanceM(42195.0);
             WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
         } else if (id == :dCustom) {
-            WatchUi.pushView(new PaceMateCustomDistancePicker(), new PaceMateCustomDistancePickerDelegate(), WatchUi.SLIDE_IMMEDIATE);
+            WatchUi.pushView(new PaceMateCustomDistanceMenu(), new PaceMateCustomDistanceMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
         }
     }
 }

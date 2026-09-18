@@ -9,21 +9,12 @@ import Toybox.WatchUi;
 // receive tap input - everything worth seeing mid-run is on screen
 // together.
 //
-// Average pace, target pace, the delta column, and projected finish
-// time can each be hidden via Garmin Connect Mobile/Express
-// (showAveragePace, showTargetPace, showDelta, showProjectedFinish) -
-// hidden fields free their space for whatever's left, rather than
-// leaving a blank gap. Current Pace always shows.
+// Average pace, split pace, target pace, the delta column, and
+// projected finish time can each be hidden via Garmin Connect Mobile/
+// Express (showAveragePace, showSplitPace, showTargetPace, showDelta,
+// showProjectedFinish) - hidden fields free their space for whatever's
+// left, rather than leaving a blank gap. Current Pace always shows.
 class PaceMateFieldView extends WatchUi.DataField {
-
-    // Distance between rolling-pace checkpoints. Garmin's compute() only
-    // fires once per second (fixed by the system, not overridable), so
-    // "current pace" is instead calculated from elapsed distance/time
-    // since the last checkpoint - recomputed every second as that window
-    // rolls forward - rather than raw instantaneous GPS speed, which is
-    // noisy. This gives a smoother, more representative pace than
-    // currentSpeed while still updating every second.
-    private const CHECKPOINT_METERS = 100.0;
 
     // Largest-to-smallest so the fit search below picks the first (i.e.
     // biggest) font whose rendered width still clears the column.
@@ -42,9 +33,16 @@ class PaceMateFieldView extends WatchUi.DataField {
     private var _targetPaceSec as Float = 0.0;
     private var _deltaSec as Float = 0.0;
     private var _projectedFinishSec as Number = 0;
+    private var _splitPaceSec as Float = 0.0;
 
     private var _checkpointDistanceM as Float = 0.0;
     private var _checkpointTimeSec as Float = 0.0;
+
+    // Marks the start of the current, in-progress km/mile, so Split
+    // Pace can be computed live from here to now every second - reset
+    // the moment each whole unit completes, to start timing the next one.
+    private var _unitCheckpointDistanceM as Float = 0.0;
+    private var _unitCheckpointTimeSec as Float = 0.0;
 
     public function initialize() {
         DataField.initialize();
@@ -57,26 +55,43 @@ class PaceMateFieldView extends WatchUi.DataField {
         var elapsedTimeSec = (info.timerTime != null) ? info.timerTime / 1000.0 : null;
 
         if (elapsedDistanceM != null && elapsedTimeSec != null) {
+            var checkpointMeters = PaceMateCalc.getPaceSmoothingM();
             var distanceSinceCheckpoint = elapsedDistanceM - _checkpointDistanceM;
 
-            if (distanceSinceCheckpoint >= CHECKPOINT_METERS) {
-                // Rolled past the next 100m mark: compute pace over that
-                // window, then advance the checkpoint to here.
+            if (distanceSinceCheckpoint >= checkpointMeters) {
+                // Rolled past the next smoothing-window mark: compute
+                // pace over that window, then advance the checkpoint.
                 var timeSinceCheckpoint = elapsedTimeSec - _checkpointTimeSec;
                 _currentPaceSec = PaceMateCalc.paceSecPerUnitFromWindow(distanceSinceCheckpoint, timeSinceCheckpoint);
                 _checkpointDistanceM = elapsedDistanceM;
                 _checkpointTimeSec = elapsedTimeSec;
             } else if (distanceSinceCheckpoint > 0) {
-                // Still within the current 100m window: show pace over
-                // the partial window so it's never stuck for up to 100m.
+                // Still within the current window: show pace over the
+                // partial window so it's never stuck for the whole gap.
                 var partialTime = elapsedTimeSec - _checkpointTimeSec;
                 _currentPaceSec = PaceMateCalc.paceSecPerUnitFromWindow(distanceSinceCheckpoint, partialTime);
             }
 
             // Average pace over the whole activity so far - same
             // distance/time-window math as current pace, just windowed
-            // over everything instead of the last ~100m.
+            // over everything instead of the last checkpoint gap.
             _averagePaceSec = PaceMateCalc.paceSecPerUnitFromWindow(elapsedDistanceM, elapsedTimeSec);
+
+            // Split Pace: live pace for the current, in-progress km/mile
+            // - recomputed every second from the start of this unit to
+            // now, same as Average but scoped to just the current split
+            // instead of the whole activity. Once elapsed distance
+            // crosses a whole unit, that split is done: reset the
+            // checkpoint to here so the next unit starts timing at 0.
+            var unitMeters = PaceMateCalc.unitDistanceMeters();
+            var distanceSinceUnitCheckpoint = elapsedDistanceM - _unitCheckpointDistanceM;
+            if (distanceSinceUnitCheckpoint >= unitMeters) {
+                _unitCheckpointDistanceM = elapsedDistanceM;
+                _unitCheckpointTimeSec = elapsedTimeSec;
+                distanceSinceUnitCheckpoint = 0.0;
+            }
+            var timeSinceUnitCheckpoint = elapsedTimeSec - _unitCheckpointTimeSec;
+            _splitPaceSec = PaceMateCalc.paceSecPerUnitFromWindow(distanceSinceUnitCheckpoint, timeSinceUnitCheckpoint);
         }
 
         _deltaSec = PaceMateCalc.paceDeltaSec(_currentPaceSec, _targetPaceSec);
@@ -102,6 +117,7 @@ class PaceMateFieldView extends WatchUi.DataField {
         var h = dc.getHeight();
 
         var showAverage = PaceMateCalc.getShowAveragePace();
+        var showSplit = PaceMateCalc.getShowSplitPace();
         var showTarget = PaceMateCalc.getShowTargetPace();
         var showDelta = PaceMateCalc.getShowDelta();
         var showFinish = PaceMateCalc.getShowProjectedFinish();
@@ -117,6 +133,12 @@ class PaceMateFieldView extends WatchUi.DataField {
         if (showAverage) {
             topLabels.add("AVG");
             topValues.add(PaceMateCalc.formatPace(_averagePaceSec));
+            topColors.add(fgColor);
+        }
+
+        if (showSplit) {
+            topLabels.add(PaceMateCalc.unitLabel().toUpper());
+            topValues.add(PaceMateCalc.formatPace(_splitPaceSec));
             topColors.add(fgColor);
         }
 

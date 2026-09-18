@@ -43,7 +43,7 @@ class PaceMateMainMenuDelegate extends WatchUi.Menu2InputDelegate {
         if (id == :distance) {
             WatchUi.pushView(new PaceMateDistanceMenu(), new PaceMateDistanceMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
         } else if (id == :finishTime) {
-            WatchUi.pushView(new PaceMateTimePicker(), new PaceMateTimePickerDelegate(), WatchUi.SLIDE_IMMEDIATE);
+            WatchUi.pushView(new PaceMateTimeMenu(), new PaceMateTimeMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
         } else if (id == :units) {
             WatchUi.pushView(new PaceMateUnitsMenu(), new PaceMateUnitsMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
         }
