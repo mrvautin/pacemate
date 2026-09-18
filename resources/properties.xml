@@ -22,6 +22,18 @@
         -->
         <property id="raceDistanceDisplay" type="float">5.0</property>
         <property id="finishTimeMin" type="number">30</property>
+
+        <!--
+            Field visibility toggles (Garmin Connect Mobile/Express only -
+            not exposed on-device, since the watch's own settings menu is
+            for race parameters, not layout). Hiding a field lets the
+            remaining fields grow to fill the space; Current Pace always
+            shows since it's the field's whole reason to exist.
+        -->
+        <property id="showTargetPace" type="boolean">false</property>
+        <property id="showDelta" type="boolean">true</property>
+        <property id="showProjectedFinish" type="boolean">true</property>
+        <property id="showAveragePace" type="boolean">true</property>
     </properties>
 
 </resources>

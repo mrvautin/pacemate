@@ -12,6 +12,10 @@ module PaceMateCalc {
     const PROP_UNITS = "distanceUnits";
     const PROP_DISTANCE_DISPLAY = "raceDistanceDisplay";
     const PROP_FINISH_MIN = "finishTimeMin";
+    const PROP_SHOW_TARGET = "showTargetPace";
+    const PROP_SHOW_DELTA = "showDelta";
+    const PROP_SHOW_FINISH = "showProjectedFinish";
+    const PROP_SHOW_AVERAGE = "showAveragePace";
 
     enum {
         UNITS_KM = 0,
@@ -40,6 +44,26 @@ module PaceMateCalc {
     function getUnits() as Number {
         var v = Properties.getValue(PROP_UNITS);
         return (v == null) ? UNITS_KM : v.toNumber();
+    }
+
+    function getShowTargetPace() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_TARGET);
+        return (v == null) ? false : v;
+    }
+
+    function getShowDelta() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_DELTA);
+        return (v == null) ? true : v;
+    }
+
+    function getShowProjectedFinish() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_FINISH);
+        return (v == null) ? true : v;
+    }
+
+    function getShowAveragePace() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_AVERAGE);
+        return (v == null) ? true : v;
     }
 
     function setRaceDistanceM(meters as Float) as Void {

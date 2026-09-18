@@ -22,6 +22,22 @@
         <setting propertyKey="@Properties.finishTimeMin" title="@Strings.finishTimeTitle">
             <settingConfig type="numeric" />
         </setting>
+
+        <setting propertyKey="@Properties.showTargetPace" title="@Strings.showTargetTitle">
+            <settingConfig type="boolean" />
+        </setting>
+
+        <setting propertyKey="@Properties.showDelta" title="@Strings.showDeltaTitle">
+            <settingConfig type="boolean" />
+        </setting>
+
+        <setting propertyKey="@Properties.showProjectedFinish" title="@Strings.showFinishTitle">
+            <settingConfig type="boolean" />
+        </setting>
+
+        <setting propertyKey="@Properties.showAveragePace" title="@Strings.showAverageTitle">
+            <settingConfig type="boolean" />
+        </setting>
     </settings>
 
 </resources>
