@@ -7,11 +7,12 @@ Stay locked onto your goal pace with a clean, at-a-glance race screen built for 
 PaceMate shows exactly what you need, when you need it:
 
 - **Current Pace** — your real-time pace
+- **Average Pace** — your average pace across the whole activity so far
 - **Target Pace** — the pace you need to hit your goal
 - **Ahead/Behind** — how far you're ahead of or behind target, updated live
 - **Projected Finish** — your estimated finish time based on current effort
 
-No clutter, no digging through menus mid-race — just the numbers that matter, laid out clearly so you can check your progress with a glance at your wrist.
+No clutter, no digging through menus mid-race — just the numbers that matter, laid out clearly so you can check your progress with a glance at your wrist. Every field except Current Pace can be turned on or off, and whatever's left grows to fill the space.
 
 <img src="resources/images/ahead-target.png" width="220" alt="PaceMate data field showing current pace, target pace, ahead/behind delta, and projected finish time">
 
@@ -27,7 +28,7 @@ PaceMate is a data field, so it needs to be added to a data screen on a run prof
 
 1. From the watch face, press **START/ENTER** and select **Run** (or your preferred running activity).
 2. Before starting, scroll to a data screen and hold **MENU** to edit it.
-3. Select **Edit Layout** and choose the **1-field** layout — PaceMate is dense enough to stand alone and already shows pace, target, delta, and finish time together, so a multi-field layout just wastes space.
+3. Select **Edit Layout** and choose the **1-field** layout — PaceMate is dense enough to stand alone and already shows pace, delta, and finish time together, so a multi-field layout just wastes space.
 4. Pick **PaceMate** from the Connect IQ Fields section for that field slot.
 
 ### 3. Configure it
@@ -52,11 +53,23 @@ Fully configurable, right on your watch. Set your race distance, target finish t
 
 **From your phone:** prefer to set it up beforehand? Open Garmin Connect Mobile → **Devices** → your watch → **Data Fields / Connect IQ Store** → PaceMate → **Settings**, and enter the same three values. Changes sync to the watch automatically.
 
+**Choosing which fields show:** which fields appear on screen is configured from your phone only — Garmin Connect Mobile/Express → **Devices** → your watch → **Data Fields / Connect IQ Store** → PaceMate → **Settings**:
+
+| Field            | Default |
+| ---------------- | ------- |
+| Current Pace     | always on |
+| Average Pace     | on      |
+| Target Pace      | off     |
+| Ahead/Behind     | on      |
+| Projected Finish | on      |
+
+Turn a field off and the remaining fields grow to fill the space, so the layout stays balanced whatever combination you pick.
+
 ### 4. Run
 
 Start your activity as normal. Current pace needs about 100m of GPS-tracked movement to settle into a steady reading — that's by design, so it reflects your real recent pace rather than jumpy instantaneous GPS speed.
 
-The Ahead/Behind delta turns green when you're running faster than target pace and red when you're slower. Projected Finish updates continuously from your current pace, so it's a live "if you keep this up" estimate.
+The Ahead/Behind delta turns green when you're running faster than target pace and red when you're slower — this compares against your target pace even if the Target Pace field itself is turned off. Projected Finish updates continuously from your current pace, so it's a live "if you keep this up" estimate.
 
 Whether you're chasing a PB, pacing a training run, or just want a clearer view of how the race is unfolding, PaceMate keeps you focused on what matters: hitting your target.
 
