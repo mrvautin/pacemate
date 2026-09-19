@@ -10,6 +10,7 @@
     <string id="showFinishTitle">Show Projected Finish (at current pace)</string>
     <string id="showAverageTitle">Show Average Pace (whole activity so far)</string>
     <string id="showSplitTitle">Show Km/Mi Split Pace (current km/mile, live)</string>
+    <string id="showFinishDeltaTitle">Show Finish +/- (projected finish vs. goal time)</string>
     <string id="paceSmoothingTitle">Pace Smoothing (distance Current Pace averages over)</string>
     <string id="smoothing50">50 m - more responsive, more GPS jitter</string>
     <string id="smoothing100">100 m - default</string>

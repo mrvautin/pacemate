@@ -10,7 +10,8 @@ PaceMate shows exactly what you need, when you need it:
 - **Average Pace** — your average pace across the whole activity so far
 - **Km/Mi Split Pace** — your live pace for the km or mile you're currently in
 - **Target Pace** — the pace you need to hit your goal
-- **Ahead/Behind** — how far you're ahead of or behind target, updated live
+- **Ahead/Behind** — how far you're ahead of or behind target pace, updated live
+- **Finish +/-** — how far ahead or behind your goal finish time you're projected to end up
 - **Projected Finish** — your estimated finish time based on current effort
 
 No clutter, no digging through menus mid-race — just the numbers that matter, laid out clearly so you can check your progress with a glance at your wrist. Every field except Current Pace can be turned on or off, and whatever's left grows to fill the space.
@@ -63,6 +64,7 @@ Fully configurable, right on your watch. Set your race distance, target finish t
 | Km/Mi Split Pace | off | Your live pace for the km or mile you're currently in — resets and starts timing fresh every time you complete one. |
 | Target Pace | off | The pace you need to hold to hit your goal finish time, worked out from Race Distance and Finish Time. |
 | Ahead/Behind | on | How far ahead of or behind your target pace you're currently running, updated live. Green means ahead, red means behind. Compares against target pace even if Target Pace itself is hidden. |
+| Finish +/- | off | How far ahead of or behind your goal finish time you're projected to end up, based on your pace so far — not the same as Ahead/Behind, which compares your instantaneous pace rather than your likely finish. |
 | Projected Finish | on | Your estimated finish time if you keep running at your current pace — a live "if you keep this up" estimate, not a fixed prediction from your goal. |
 
 Turn a field off and the remaining fields grow to fill the space, so the layout stays balanced whatever combination you pick.

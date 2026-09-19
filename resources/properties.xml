@@ -35,6 +35,7 @@
         <property id="showProjectedFinish" type="boolean">true</property>
         <property id="showAveragePace" type="boolean">true</property>
         <property id="showSplitPace" type="boolean">false</property>
+        <property id="showFinishDelta" type="boolean">false</property>
 
         <!--
             Current-pace smoothing window, in meters. Phone-configured

@@ -17,6 +17,7 @@ module PaceMateCalc {
     const PROP_SHOW_FINISH = "showProjectedFinish";
     const PROP_SHOW_AVERAGE = "showAveragePace";
     const PROP_SHOW_SPLIT = "showSplitPace";
+    const PROP_SHOW_FINISH_DELTA = "showFinishDelta";
     const PROP_PACE_SMOOTHING_M = "paceSmoothingM";
 
     enum {
@@ -70,6 +71,11 @@ module PaceMateCalc {
 
     function getShowSplitPace() as Boolean {
         var v = Properties.getValue(PROP_SHOW_SPLIT);
+        return (v == null) ? false : v;
+    }
+
+    function getShowFinishDelta() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_FINISH_DELTA);
         return (v == null) ? false : v;
     }
 
@@ -145,6 +151,19 @@ module PaceMateCalc {
         return currentPaceSec - targetPaceSec;
     }
 
+    // Positive => projected to finish slower than goal (behind); negative
+    // => projected to finish faster (ahead). Distinct from paceDeltaSec:
+    // this is "will I actually hit my goal at this rate" rather than
+    // "am I running the right pace right now" - it reflects the whole
+    // race so far, not just the current instant.
+    function finishDeltaSec(projectedFinishSec as Number) as Number {
+        var targetFinishSec = getFinishTimeSec();
+        if (projectedFinishSec <= 0 || targetFinishSec <= 0) {
+            return 0;
+        }
+        return projectedFinishSec - targetFinishSec;
+    }
+
     // Projected finish time (seconds) based on elapsed distance/time and
     // current pace, blended with target pace for the remaining distance.
     function projectedFinishSec(elapsedDistanceM as Float or Null, elapsedTimeSec as Float or Null, currentPaceSec as Float) as Number {
@@ -186,6 +205,18 @@ module PaceMateCalc {
         var mins = absSec / 60;
         var secs = absSec % 60;
         return sign + mins.format("%d") + ":" + secs.format("%02d");
+    }
+
+    // Formats a +/- finish-time delta as e.g. "+12:30" or "-1:05:00" -
+    // unlike a pace delta this can run well past 59 minutes, so it
+    // rolls over into H:MM:SS once it reaches an hour.
+    function formatFinishDelta(deltaSec as Number) as String {
+        if (deltaSec == 0) {
+            return "0:00";
+        }
+        var sign = (deltaSec > 0) ? "+" : "-";
+        var absSec = (deltaSec > 0) ? deltaSec : -deltaSec;
+        return sign + formatDuration(absSec);
     }
 
     // Formats seconds as H:MM:SS (or M:SS if under an hour).

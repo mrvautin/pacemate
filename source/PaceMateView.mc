@@ -9,9 +9,10 @@ import Toybox.WatchUi;
 // receive tap input - everything worth seeing mid-run is on screen
 // together.
 //
-// Average pace, split pace, target pace, the delta column, and
-// projected finish time can each be hidden via Garmin Connect Mobile/
-// Express (showAveragePace, showSplitPace, showTargetPace, showDelta,
+// Average pace, split pace, target pace, the pace delta column, the
+// finish-time delta column, and projected finish time can each be
+// hidden via Garmin Connect Mobile/Express (showAveragePace,
+// showSplitPace, showTargetPace, showDelta, showFinishDelta,
 // showProjectedFinish) - hidden fields free their space for whatever's
 // left, rather than leaving a blank gap. Current Pace always shows.
 class PaceMateFieldView extends WatchUi.DataField {
@@ -33,6 +34,7 @@ class PaceMateFieldView extends WatchUi.DataField {
     private var _targetPaceSec as Float = 0.0;
     private var _deltaSec as Float = 0.0;
     private var _projectedFinishSec as Number = 0;
+    private var _finishDeltaSec as Number = 0;
     private var _splitPaceSec as Float = 0.0;
 
     private var _checkpointDistanceM as Float = 0.0;
@@ -96,6 +98,7 @@ class PaceMateFieldView extends WatchUi.DataField {
 
         _deltaSec = PaceMateCalc.paceDeltaSec(_currentPaceSec, _targetPaceSec);
         _projectedFinishSec = PaceMateCalc.projectedFinishSec(elapsedDistanceM, elapsedTimeSec, _currentPaceSec);
+        _finishDeltaSec = PaceMateCalc.finishDeltaSec(_projectedFinishSec);
     }
 
     public function onUpdate(dc as Dc) as Void {
@@ -120,6 +123,7 @@ class PaceMateFieldView extends WatchUi.DataField {
         var showSplit = PaceMateCalc.getShowSplitPace();
         var showTarget = PaceMateCalc.getShowTargetPace();
         var showDelta = PaceMateCalc.getShowDelta();
+        var showFinishDelta = PaceMateCalc.getShowFinishDelta();
         var showFinish = PaceMateCalc.getShowProjectedFinish();
 
         var topLabels = [] as Array<String>;
@@ -156,6 +160,16 @@ class PaceMateFieldView extends WatchUi.DataField {
             topLabels.add("+/-");
             topValues.add(PaceMateCalc.formatPaceDelta(_deltaSec));
             topColors.add(deltaColor);
+        }
+
+        if (showFinishDelta) {
+            var finishDeltaColor = fgColor;
+            if (_finishDeltaSec != 0) {
+                finishDeltaColor = (_finishDeltaSec > 0) ? behindColor : aheadColor;
+            }
+            topLabels.add("FIN+/-");
+            topValues.add(PaceMateCalc.formatFinishDelta(_finishDeltaSec));
+            topColors.add(finishDeltaColor);
         }
 
         var colCount = topLabels.size();
