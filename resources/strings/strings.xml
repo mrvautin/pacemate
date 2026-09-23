@@ -15,4 +15,7 @@
     <string id="smoothing50">50 m - more responsive, more GPS jitter</string>
     <string id="smoothing100">100 m - default</string>
     <string id="smoothing200">200 m - smoother, slower to react</string>
+    <string id="backgroundModeTitle">Background (forces black or white)</string>
+    <string id="backgroundBlack">Black - default</string>
+    <string id="backgroundWhite">White</string>
 </resources>

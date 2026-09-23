@@ -54,6 +54,13 @@
                 <listEntry value="200">@Strings.smoothing200</listEntry>
             </settingConfig>
         </setting>
+
+        <setting propertyKey="@Properties.backgroundMode" title="@Strings.backgroundModeTitle">
+            <settingConfig type="list">
+                <listEntry value="0">@Strings.backgroundBlack</listEntry>
+                <listEntry value="1">@Strings.backgroundWhite</listEntry>
+            </settingConfig>
+        </setting>
     </settings>
 
 </resources>

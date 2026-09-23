@@ -102,8 +102,13 @@ class PaceMateFieldView extends WatchUi.DataField {
     }
 
     public function onUpdate(dc as Dc) as Void {
-        var bgColor = getBackgroundColor();
-        var onWhite = (bgColor != Graphics.COLOR_BLACK);
+        // Background is forced by the phone-configured Background
+        // setting, not read from the watch's own field/theme background
+        // (getBackgroundColor()) - that avoided a real bug where the
+        // watch's actual background didn't match what this field could
+        // reliably detect, leaving text unreadable on some devices.
+        var onWhite = (PaceMateCalc.getBackgroundMode() == PaceMateCalc.BACKGROUND_WHITE);
+        var bgColor = onWhite ? Graphics.COLOR_WHITE : Graphics.COLOR_BLACK;
         var fgColor = onWhite ? Graphics.COLOR_BLACK : Graphics.COLOR_WHITE;
         // Plain LT_GRAY all but disappears on a white field background;
         // DK_GRAY is the equivalent low-emphasis label color there. Same

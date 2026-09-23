@@ -19,10 +19,16 @@ module PaceMateCalc {
     const PROP_SHOW_SPLIT = "showSplitPace";
     const PROP_SHOW_FINISH_DELTA = "showFinishDelta";
     const PROP_PACE_SMOOTHING_M = "paceSmoothingM";
+    const PROP_BACKGROUND_MODE = "backgroundMode";
 
     enum {
         UNITS_KM = 0,
         UNITS_MILES = 1
+    }
+
+    enum {
+        BACKGROUND_BLACK = 0,
+        BACKGROUND_WHITE = 1
     }
 
     const METERS_PER_KM = 1000.0;
@@ -77,6 +83,16 @@ module PaceMateCalc {
     function getShowFinishDelta() as Boolean {
         var v = Properties.getValue(PROP_SHOW_FINISH_DELTA);
         return (v == null) ? false : v;
+    }
+
+    // Forces the field's background to black or white regardless of the
+    // watch's own field/theme background - phone-configured only, since
+    // it's a display preference rather than a race parameter. Defaults
+    // to black: most Garmin watch UIs (and this field's own color
+    // choices) are designed against a black background first.
+    function getBackgroundMode() as Number {
+        var v = Properties.getValue(PROP_BACKGROUND_MODE);
+        return (v == null) ? BACKGROUND_BLACK : v.toNumber();
     }
 
     // Distance between rolling current-pace checkpoints, in meters -

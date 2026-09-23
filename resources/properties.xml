@@ -44,6 +44,13 @@
             menu (Race Distance / Finish Time / Units).
         -->
         <property id="paceSmoothingM" type="number">100</property>
+
+        <!--
+            Forces the field's background to black or white, regardless
+            of the watch's own field/theme background. Phone-configured
+            only. Defaults to black (0).
+        -->
+        <property id="backgroundMode" type="number">0</property>
     </properties>
 
 </resources>
