@@ -29,6 +29,20 @@ class PaceMateFieldView extends WatchUi.DataField {
         Graphics.FONT_XTINY
     ] as Array<Graphics.FontType>;
 
+    // Same ladder minus the FONT_NUMBER_* fonts, which Garmin documents
+    // as "number only" - their +/-/: glyphs aren't full first-class
+    // characters, which throws off getTextDimensions()/TEXT_JUSTIFY_CENTER
+    // for a sign-bearing string like "-0:21" even though it looks fine
+    // for a plain "7:06". Used for the +/- and FIN+/- columns so they
+    // stay correctly centered under their own label.
+    private const EMPHASIS_VALUE_FONTS = [
+        Graphics.FONT_LARGE,
+        Graphics.FONT_MEDIUM,
+        Graphics.FONT_SMALL,
+        Graphics.FONT_TINY,
+        Graphics.FONT_XTINY
+    ] as Array<Graphics.FontType>;
+
     private var _currentPaceSec as Float = 0.0;
     private var _averagePaceSec as Float = 0.0;
     private var _targetPaceSec as Float = 0.0;
@@ -134,27 +148,38 @@ class PaceMateFieldView extends WatchUi.DataField {
         var topLabels = [] as Array<String>;
         var topValues = [] as Array<String>;
         var topColors = [] as Array<Number>;
+        // Ahead/behind columns (+/- and FIN+/-) are the "am I on pace"
+        // signal - the thing this field exists to make glanceable mid-
+        // run - so they're fit and sized separately from the plain pace
+        // values, rather than sharing one size across the whole row
+        // where more optional columns just squeeze everything down
+        // equally. They get their own, larger font floor.
+        var topEmphasis = [] as Array<Boolean>;
 
         topLabels.add("CUR");
         topValues.add(PaceMateCalc.formatPace(_currentPaceSec));
         topColors.add(fgColor);
+        topEmphasis.add(false);
 
         if (showAverage) {
             topLabels.add("AVG");
             topValues.add(PaceMateCalc.formatPace(_averagePaceSec));
             topColors.add(fgColor);
+            topEmphasis.add(false);
         }
 
         if (showSplit) {
             topLabels.add(PaceMateCalc.unitLabel().toUpper());
             topValues.add(PaceMateCalc.formatPace(_splitPaceSec));
             topColors.add(fgColor);
+            topEmphasis.add(false);
         }
 
         if (showTarget) {
             topLabels.add("TGT");
             topValues.add(PaceMateCalc.formatPace(_targetPaceSec));
             topColors.add(fgColor);
+            topEmphasis.add(false);
         }
 
         if (showDelta) {
@@ -165,6 +190,7 @@ class PaceMateFieldView extends WatchUi.DataField {
             topLabels.add("+/-");
             topValues.add(PaceMateCalc.formatPaceDelta(_deltaSec));
             topColors.add(deltaColor);
+            topEmphasis.add(true);
         }
 
         if (showFinishDelta) {
@@ -175,6 +201,7 @@ class PaceMateFieldView extends WatchUi.DataField {
             topLabels.add("FIN+/-");
             topValues.add(PaceMateCalc.formatFinishDelta(_finishDeltaSec));
             topColors.add(finishDeltaColor);
+            topEmphasis.add(true);
         }
 
         var colCount = topLabels.size();
@@ -186,21 +213,44 @@ class PaceMateFieldView extends WatchUi.DataField {
         var labelH = topBandTop + (topBandBottom - topBandTop) * 0.22;
         var valueH = topBandTop + (topBandBottom - topBandTop) * 0.62;
 
+        // Columns stay evenly spaced - unequal column widths made the
+        // row look lopsided even though each value was correctly
+        // centered in its own (differently sized) column. Emphasis
+        // (+/- and FIN+/-) values instead get a taller height budget
+        // and their own font ladder (EMPHASIS_VALUE_FONTS) so they can
+        // still render bigger than the plain pace values without
+        // needing extra width to do it.
         var colWidth = w / colCount;
-        // Leave a little breathing room between columns so adjacent
-        // values never touch even at the widest font that still fits.
         var valueMaxWidth = colWidth * 0.90;
         var valueMaxHeight = (topBandBottom - topBandTop) * 0.44;
 
         var tinyLabelFont = (colCount <= 2) ? Graphics.FONT_TINY : Graphics.FONT_XTINY;
-        var topValueFont = fitFont(dc, topValues, valueMaxWidth, valueMaxHeight);
+
+        var plainValues = [] as Array<String>;
+        var emphasisValues = [] as Array<String>;
+        for (var i = 0; i < colCount; i += 1) {
+            if (topEmphasis[i]) {
+                emphasisValues.add(topValues[i]);
+            } else {
+                plainValues.add(topValues[i]);
+            }
+        }
+        var plainFont = (plainValues.size() > 0) ? fitFont(dc, plainValues, valueMaxWidth, valueMaxHeight, VALUE_FONTS) : Graphics.FONT_XTINY;
+        var emphasisFont = (emphasisValues.size() > 0) ? fitFont(dc, emphasisValues, valueMaxWidth, valueMaxHeight * 1.2, EMPHASIS_VALUE_FONTS) : Graphics.FONT_XTINY;
+        // Emphasis should never end up smaller than the plain columns -
+        // if it still lost out on the fit, fall back to matching plain
+        // rather than a mismatched smaller size.
+        if (fontRank(emphasisFont) < fontRank(plainFont)) {
+            emphasisFont = plainFont;
+        }
 
         for (var i = 0; i < colCount; i += 1) {
             var colCenter = colWidth * (i + 0.5);
             dc.setColor(labelColor, Graphics.COLOR_TRANSPARENT);
             dc.drawText(colCenter, labelH, tinyLabelFont, topLabels[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
             dc.setColor(topColors[i], Graphics.COLOR_TRANSPARENT);
-            dc.drawText(colCenter, valueH, topValueFont, topValues[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+            var valueFont = topEmphasis[i] ? emphasisFont : plainFont;
+            dc.drawText(colCenter, valueH, valueFont, topValues[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
 
         if (!showFinish) {
@@ -215,7 +265,7 @@ class PaceMateFieldView extends WatchUi.DataField {
         var finishLabelH = h * 0.68;
         var finishValueH = h * 0.85;
         var finishValue = PaceMateCalc.formatDuration(_projectedFinishSec);
-        var finishFont = fitFont(dc, [finishValue], w * 0.85, h * 0.24);
+        var finishFont = fitFont(dc, [finishValue], w * 0.85, h * 0.24, VALUE_FONTS);
 
         dc.setColor(labelColor, Graphics.COLOR_TRANSPARENT);
         dc.drawText(w / 2, finishLabelH, Graphics.FONT_XTINY, "PROJ. FINISH", Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
@@ -223,13 +273,13 @@ class PaceMateFieldView extends WatchUi.DataField {
         dc.drawText(w / 2, finishValueH, finishFont, finishValue, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 
-    // Picks the largest font in VALUE_FONTS under which every string in
+    // Picks the largest font in `fonts` under which every string in
     // `values` still fits within (maxWidth, maxHeight), so fewer visible
     // fields (or a wider field/bigger watch) render with bigger text
     // instead of the layout leaving space unused.
-    private function fitFont(dc as Dc, values as Array<String>, maxWidth as Float, maxHeight as Float) as Graphics.FontType {
-        for (var i = 0; i < VALUE_FONTS.size(); i += 1) {
-            var font = VALUE_FONTS[i];
+    private function fitFont(dc as Dc, values as Array<String>, maxWidth as Float, maxHeight as Float, fonts as Array<Graphics.FontType>) as Graphics.FontType {
+        for (var i = 0; i < fonts.size(); i += 1) {
+            var font = fonts[i];
             var fits = true;
             for (var j = 0; j < values.size(); j += 1) {
                 var dims = dc.getTextDimensions(values[j], font);
@@ -243,5 +293,26 @@ class PaceMateFieldView extends WatchUi.DataField {
             }
         }
         return Graphics.FONT_XTINY;
+    }
+
+    // Index of `font` within EMPHASIS_VALUE_FONTS (lower = visually
+    // bigger), used to compare a plain-font result against an
+    // emphasis-font result on a shared scale. VALUE_FONTS' extra
+    // FONT_NUMBER_* entries rank above (bigger than) anything in
+    // EMPHASIS_VALUE_FONTS, matching their position at the front of
+    // VALUE_FONTS. Fonts in neither list rank last.
+    private function fontRank(font as Graphics.FontType) as Number {
+        var numberFontCount = VALUE_FONTS.size() - EMPHASIS_VALUE_FONTS.size();
+        for (var i = 0; i < EMPHASIS_VALUE_FONTS.size(); i += 1) {
+            if (EMPHASIS_VALUE_FONTS[i] == font) {
+                return numberFontCount + i;
+            }
+        }
+        for (var i = 0; i < numberFontCount; i += 1) {
+            if (VALUE_FONTS[i] == font) {
+                return i;
+            }
+        }
+        return VALUE_FONTS.size();
     }
 }
