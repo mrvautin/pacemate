@@ -5,6 +5,7 @@
     <string id="unitsTitle">Distance Units (km or mi)</string>
     <string id="unitsKm">Kilometers</string>
     <string id="unitsMiles">Miles</string>
+    <string id="showCurrentTitle">Show Current Pace (real-time, default on)</string>
     <string id="showTargetTitle">Show Target Pace (pace needed to hit your goal)</string>
     <string id="showDeltaTitle">Show Ahead/Behind (vs. target pace, live)</string>
     <string id="showFinishTitle">Show Projected Finish (at current pace)</string>

@@ -23,6 +23,10 @@
             <settingConfig type="numeric" />
         </setting>
 
+        <setting propertyKey="@Properties.showCurrentPace" title="@Strings.showCurrentTitle">
+            <settingConfig type="boolean" />
+        </setting>
+
         <setting propertyKey="@Properties.showTargetPace" title="@Strings.showTargetTitle">
             <settingConfig type="boolean" />
         </setting>

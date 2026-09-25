@@ -27,9 +27,11 @@
             Field visibility toggles (Garmin Connect Mobile/Express only -
             not exposed on-device, since the watch's own settings menu is
             for race parameters, not layout). Hiding a field lets the
-            remaining fields grow to fill the space; Current Pace always
-            shows since it's the field's whole reason to exist.
+            remaining fields grow to fill the space. If every field ends
+            up hidden, PaceMateFieldView forces Current Pace back on
+            rather than showing a blank screen.
         -->
+        <property id="showCurrentPace" type="boolean">true</property>
         <property id="showTargetPace" type="boolean">false</property>
         <property id="showDelta" type="boolean">true</property>
         <property id="showProjectedFinish" type="boolean">true</property>

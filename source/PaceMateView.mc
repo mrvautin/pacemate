@@ -29,20 +29,6 @@ class PaceMateFieldView extends WatchUi.DataField {
         Graphics.FONT_XTINY
     ] as Array<Graphics.FontType>;
 
-    // Same ladder minus the FONT_NUMBER_* fonts, which Garmin documents
-    // as "number only" - their +/-/: glyphs aren't full first-class
-    // characters, which throws off getTextDimensions()/TEXT_JUSTIFY_CENTER
-    // for a sign-bearing string like "-0:21" even though it looks fine
-    // for a plain "7:06". Used for the +/- and FIN+/- columns so they
-    // stay correctly centered under their own label.
-    private const EMPHASIS_VALUE_FONTS = [
-        Graphics.FONT_LARGE,
-        Graphics.FONT_MEDIUM,
-        Graphics.FONT_SMALL,
-        Graphics.FONT_TINY,
-        Graphics.FONT_XTINY
-    ] as Array<Graphics.FontType>;
-
     private var _currentPaceSec as Float = 0.0;
     private var _averagePaceSec as Float = 0.0;
     private var _targetPaceSec as Float = 0.0;
@@ -138,6 +124,7 @@ class PaceMateFieldView extends WatchUi.DataField {
         var w = dc.getWidth();
         var h = dc.getHeight();
 
+        var showCurrent = PaceMateCalc.getShowCurrentPace();
         var showAverage = PaceMateCalc.getShowAveragePace();
         var showSplit = PaceMateCalc.getShowSplitPace();
         var showTarget = PaceMateCalc.getShowTargetPace();
@@ -145,41 +132,39 @@ class PaceMateFieldView extends WatchUi.DataField {
         var showFinishDelta = PaceMateCalc.getShowFinishDelta();
         var showFinish = PaceMateCalc.getShowProjectedFinish();
 
+        // Never let every field end up hidden at once - a blank field
+        // would be worse than a redundant Current Pace, so it's forced
+        // back on if the user has switched off everything else too.
+        if (!showCurrent && !showAverage && !showSplit && !showTarget && !showDelta && !showFinishDelta && !showFinish) {
+            showCurrent = true;
+        }
+
         var topLabels = [] as Array<String>;
         var topValues = [] as Array<String>;
         var topColors = [] as Array<Number>;
-        // Ahead/behind columns (+/- and FIN+/-) are the "am I on pace"
-        // signal - the thing this field exists to make glanceable mid-
-        // run - so they're fit and sized separately from the plain pace
-        // values, rather than sharing one size across the whole row
-        // where more optional columns just squeeze everything down
-        // equally. They get their own, larger font floor.
-        var topEmphasis = [] as Array<Boolean>;
 
-        topLabels.add("CUR");
-        topValues.add(PaceMateCalc.formatPace(_currentPaceSec));
-        topColors.add(fgColor);
-        topEmphasis.add(false);
+        if (showCurrent) {
+            topLabels.add("CUR");
+            topValues.add(PaceMateCalc.formatPace(_currentPaceSec));
+            topColors.add(fgColor);
+        }
 
         if (showAverage) {
             topLabels.add("AVG");
             topValues.add(PaceMateCalc.formatPace(_averagePaceSec));
             topColors.add(fgColor);
-            topEmphasis.add(false);
         }
 
         if (showSplit) {
             topLabels.add(PaceMateCalc.unitLabel().toUpper());
             topValues.add(PaceMateCalc.formatPace(_splitPaceSec));
             topColors.add(fgColor);
-            topEmphasis.add(false);
         }
 
         if (showTarget) {
             topLabels.add("TGT");
             topValues.add(PaceMateCalc.formatPace(_targetPaceSec));
             topColors.add(fgColor);
-            topEmphasis.add(false);
         }
 
         if (showDelta) {
@@ -190,7 +175,6 @@ class PaceMateFieldView extends WatchUi.DataField {
             topLabels.add("+/-");
             topValues.add(PaceMateCalc.formatPaceDelta(_deltaSec));
             topColors.add(deltaColor);
-            topEmphasis.add(true);
         }
 
         if (showFinishDelta) {
@@ -201,56 +185,63 @@ class PaceMateFieldView extends WatchUi.DataField {
             topLabels.add("FIN+/-");
             topValues.add(PaceMateCalc.formatFinishDelta(_finishDeltaSec));
             topColors.add(finishDeltaColor);
-            topEmphasis.add(true);
         }
 
         var colCount = topLabels.size();
 
         // Reserve the bottom band only if Projected Finish is shown;
-        // otherwise the top row gets the full height to grow into.
-        var topBandBottom = showFinish ? (h * 0.58) : h;
-        var topBandTop = h * 0.10;
-        var labelH = topBandTop + (topBandBottom - topBandTop) * 0.22;
-        var valueH = topBandTop + (topBandBottom - topBandTop) * 0.62;
+        // otherwise the top row gets the full height to grow into. A
+        // plain 50/50 split, regardless of column count - varying this
+        // by column count kept trading one bad case for another. The
+        // divider line and the whole Projected Finish row are
+        // positioned from this same value (never a separate hardcoded
+        // fraction of h) so they always agree with where the top band
+        // actually ends.
+        var topBandBottom = showFinish ? (h * 0.50) : h;
+        // The top margin exists so a row's outer labels (near col1/
+        // col3, close to the round bezel) don't clip under the curve.
+        // That's only avoidable with exactly 1 column, which sits dead
+        // center - 2+ columns still have labels off-center near the
+        // edge and need the full margin, same as 3+. Wrongly shrinking
+        // it for colCount == 2 was clipping "CUR"/"+/-" under the bezel.
+        var topMarginFrac = (colCount == 1) ? 0.03 : 0.10;
+        var topBandTop = h * topMarginFrac;
+        var bandHeight = topBandBottom - topBandTop;
 
-        // Columns stay evenly spaced - unequal column widths made the
-        // row look lopsided even though each value was correctly
-        // centered in its own (differently sized) column. Emphasis
-        // (+/- and FIN+/-) values instead get a taller height budget
-        // and their own font ladder (EMPHASIS_VALUE_FONTS) so they can
-        // still render bigger than the plain pace values without
-        // needing extra width to do it.
+        // With only 1-2 columns shown, width stops being the binding
+        // constraint on font size well before height does (a single
+        // "3:49" comfortably fits a half-screen-wide column at every
+        // font size in the ladder), so fewer columns get a taller
+        // height budget to grow the font into.
         var colWidth = w / colCount;
         var valueMaxWidth = colWidth * 0.90;
-        var valueMaxHeight = (topBandBottom - topBandTop) * 0.44;
+        var valueHeightFrac = (colCount == 1) ? 0.62 : ((colCount == 2) ? 0.54 : 0.44);
+        var valueMaxHeight = bandHeight * valueHeightFrac;
 
         var tinyLabelFont = (colCount <= 2) ? Graphics.FONT_TINY : Graphics.FONT_XTINY;
+        var topValueFont = fitFont(dc, topValues, valueMaxWidth, valueMaxHeight, VALUE_FONTS);
 
-        var plainValues = [] as Array<String>;
-        var emphasisValues = [] as Array<String>;
-        for (var i = 0; i < colCount; i += 1) {
-            if (topEmphasis[i]) {
-                emphasisValues.add(topValues[i]);
-            } else {
-                plainValues.add(topValues[i]);
-            }
-        }
-        var plainFont = (plainValues.size() > 0) ? fitFont(dc, plainValues, valueMaxWidth, valueMaxHeight, VALUE_FONTS) : Graphics.FONT_XTINY;
-        var emphasisFont = (emphasisValues.size() > 0) ? fitFont(dc, emphasisValues, valueMaxWidth, valueMaxHeight * 1.2, EMPHASIS_VALUE_FONTS) : Graphics.FONT_XTINY;
-        // Emphasis should never end up smaller than the plain columns -
-        // if it still lost out on the fit, fall back to matching plain
-        // rather than a mismatched smaller size.
-        if (fontRank(emphasisFont) < fontRank(plainFont)) {
-            emphasisFont = plainFont;
-        }
+        // Label sits near the top of the band; the value is vertically
+        // centered in whatever's left underneath it, sized from the
+        // font that was actually picked - not a fixed fraction of the
+        // band assumed before the font (and therefore its real glyph
+        // height) was known. That fixed-fraction approach is what let a
+        // single big value get positioned low enough to run past
+        // topBandBottom and behind the divider/PROJ. FINISH row.
+        var labelFontHeight = dc.getTextDimensions("A", tinyLabelFont)[1];
+        var labelTop = topBandTop + bandHeight * 0.06;
+        var labelH = labelTop + labelFontHeight / 2.0;
+
+        var valueTop = labelTop + labelFontHeight + bandHeight * 0.04;
+        var valueAreaHeight = topBandBottom - valueTop;
+        var valueH = valueTop + valueAreaHeight / 2.0;
 
         for (var i = 0; i < colCount; i += 1) {
             var colCenter = colWidth * (i + 0.5);
             dc.setColor(labelColor, Graphics.COLOR_TRANSPARENT);
             dc.drawText(colCenter, labelH, tinyLabelFont, topLabels[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
             dc.setColor(topColors[i], Graphics.COLOR_TRANSPARENT);
-            var valueFont = topEmphasis[i] ? emphasisFont : plainFont;
-            dc.drawText(colCenter, valueH, valueFont, topValues[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+            dc.drawText(colCenter, valueH, topValueFont, topValues[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
 
         if (!showFinish) {
@@ -258,14 +249,18 @@ class PaceMateFieldView extends WatchUi.DataField {
         }
 
         dc.setColor(fgColor, Graphics.COLOR_TRANSPARENT);
-        dc.drawLine(w * 0.15, h * 0.58, w * 0.85, h * 0.58);
+        dc.drawLine(w * 0.15, topBandBottom, w * 0.85, topBandBottom);
 
         // Bottom: projected finish time, full width (safe near the
-        // bottom edge since it's centered and narrower than the row above).
-        var finishLabelH = h * 0.68;
-        var finishValueH = h * 0.85;
+        // bottom edge since it's centered and narrower than the row
+        // above). Positioned as fractions of the space actually left
+        // below topBandBottom (not of h), so this row stays correctly
+        // placed under the divider wherever that divider ends up.
+        var bottomBandHeight = h - topBandBottom;
+        var finishLabelH = topBandBottom + bottomBandHeight * 0.24;
+        var finishValueH = topBandBottom + bottomBandHeight * 0.64;
         var finishValue = PaceMateCalc.formatDuration(_projectedFinishSec);
-        var finishFont = fitFont(dc, [finishValue], w * 0.85, h * 0.24, VALUE_FONTS);
+        var finishFont = fitFont(dc, [finishValue], w * 0.85, bottomBandHeight * 0.56, VALUE_FONTS);
 
         dc.setColor(labelColor, Graphics.COLOR_TRANSPARENT);
         dc.drawText(w / 2, finishLabelH, Graphics.FONT_XTINY, "PROJ. FINISH", Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
@@ -293,26 +288,5 @@ class PaceMateFieldView extends WatchUi.DataField {
             }
         }
         return Graphics.FONT_XTINY;
-    }
-
-    // Index of `font` within EMPHASIS_VALUE_FONTS (lower = visually
-    // bigger), used to compare a plain-font result against an
-    // emphasis-font result on a shared scale. VALUE_FONTS' extra
-    // FONT_NUMBER_* entries rank above (bigger than) anything in
-    // EMPHASIS_VALUE_FONTS, matching their position at the front of
-    // VALUE_FONTS. Fonts in neither list rank last.
-    private function fontRank(font as Graphics.FontType) as Number {
-        var numberFontCount = VALUE_FONTS.size() - EMPHASIS_VALUE_FONTS.size();
-        for (var i = 0; i < EMPHASIS_VALUE_FONTS.size(); i += 1) {
-            if (EMPHASIS_VALUE_FONTS[i] == font) {
-                return numberFontCount + i;
-            }
-        }
-        for (var i = 0; i < numberFontCount; i += 1) {
-            if (VALUE_FONTS[i] == font) {
-                return i;
-            }
-        }
-        return VALUE_FONTS.size();
     }
 }

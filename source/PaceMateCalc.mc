@@ -12,6 +12,7 @@ module PaceMateCalc {
     const PROP_UNITS = "distanceUnits";
     const PROP_DISTANCE_DISPLAY = "raceDistanceDisplay";
     const PROP_FINISH_MIN = "finishTimeMin";
+    const PROP_SHOW_CURRENT = "showCurrentPace";
     const PROP_SHOW_TARGET = "showTargetPace";
     const PROP_SHOW_DELTA = "showDelta";
     const PROP_SHOW_FINISH = "showProjectedFinish";
@@ -53,6 +54,11 @@ module PaceMateCalc {
     function getUnits() as Number {
         var v = Properties.getValue(PROP_UNITS);
         return (v == null) ? UNITS_KM : v.toNumber();
+    }
+
+    function getShowCurrentPace() as Boolean {
+        var v = Properties.getValue(PROP_SHOW_CURRENT);
+        return (v == null) ? true : v;
     }
 
     function getShowTargetPace() as Boolean {
@@ -211,28 +217,29 @@ module PaceMateCalc {
         return mins.format("%d") + ":" + secs.format("%02d");
     }
 
-    // Formats a +/- pace delta as e.g. "+0:07" or "-0:12".
+    // Formats the magnitude of a pace delta as e.g. "0:07" - no sign,
+    // since direction is shown separately (an arrow, colored red/green)
+    // rather than a +/- character. A leading sign glyph isn't a proper
+    // first-class character in the FONT_NUMBER_* fonts (see
+    // PaceMateFieldView.VALUE_FONTS), which was throwing off
+    // getTextDimensions()/TEXT_JUSTIFY_CENTER and forcing this column
+    // onto a separate, smaller font ladder just to stay centered.
+    // Dropping the sign lets it use the same big number fonts as
+    // everything else.
     function formatPaceDelta(deltaSec as Float) as String {
-        if (deltaSec == 0.0) {
-            return "0:00";
-        }
-        var sign = (deltaSec > 0) ? "+" : "-";
         var absSec = (deltaSec > 0) ? deltaSec.toNumber() : (-deltaSec).toNumber();
         var mins = absSec / 60;
         var secs = absSec % 60;
-        return sign + mins.format("%d") + ":" + secs.format("%02d");
+        return mins.format("%d") + ":" + secs.format("%02d");
     }
 
-    // Formats a +/- finish-time delta as e.g. "+12:30" or "-1:05:00" -
-    // unlike a pace delta this can run well past 59 minutes, so it
-    // rolls over into H:MM:SS once it reaches an hour.
+    // Formats the magnitude of a finish-time delta as e.g. "12:30" or
+    // "1:05:00" - see formatPaceDelta for why there's no sign. Unlike a
+    // pace delta this can run well past 59 minutes, so it rolls over
+    // into H:MM:SS once it reaches an hour.
     function formatFinishDelta(deltaSec as Number) as String {
-        if (deltaSec == 0) {
-            return "0:00";
-        }
-        var sign = (deltaSec > 0) ? "+" : "-";
         var absSec = (deltaSec > 0) ? deltaSec : -deltaSec;
-        return sign + formatDuration(absSec);
+        return formatDuration(absSec);
     }
 
     // Formats seconds as H:MM:SS (or M:SS if under an hour).
