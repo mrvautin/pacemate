@@ -139,6 +139,29 @@ class PaceMateFieldView extends WatchUi.DataField {
             showCurrent = true;
         }
 
+        // Garmin Connect Mobile's settings screen can't enforce a max
+        // selection count - every toggle is independent. More than 3
+        // top-row fields squeezes each one too small to read at a
+        // glance (the field's whole purpose), so if more than 3 are on,
+        // only the first 3 in this fixed priority order are shown; the
+        // rest are silently dropped rather than cramming everything in.
+        var allShow = [showCurrent, showDelta, showAverage, showTarget, showSplit, showFinishDelta] as Array<Boolean>;
+        var shownCount = 0;
+        for (var s = 0; s < allShow.size(); s += 1) {
+            if (allShow[s]) {
+                shownCount += 1;
+                if (shownCount > 3) {
+                    allShow[s] = false;
+                }
+            }
+        }
+        showCurrent = allShow[0];
+        showDelta = allShow[1];
+        showAverage = allShow[2];
+        showTarget = allShow[3];
+        showSplit = allShow[4];
+        showFinishDelta = allShow[5];
+
         var topLabels = [] as Array<String>;
         var topValues = [] as Array<String>;
         var topColors = [] as Array<Number>;
@@ -214,7 +237,12 @@ class PaceMateFieldView extends WatchUi.DataField {
         // font size in the ladder), so fewer columns get a taller
         // height budget to grow the font into.
         var colWidth = w / colCount;
-        var valueMaxWidth = colWidth * 0.90;
+        // 3-column centers are spaced 0.30*w apart (20/50/80), tighter
+        // than the even 0.333*w split colWidth implies - measure the
+        // real gap so fitFont doesn't pick a font wider than the actual
+        // spacing allows.
+        var colSpacing = (colCount == 3) ? (w * 0.30) : colWidth;
+        var valueMaxWidth = colSpacing * 0.90;
         var valueHeightFrac = (colCount == 1) ? 0.62 : ((colCount == 2) ? 0.54 : 0.44);
         var valueMaxHeight = bandHeight * valueHeightFrac;
 
@@ -237,7 +265,20 @@ class PaceMateFieldView extends WatchUi.DataField {
         var valueH = valueTop + valueAreaHeight / 2.0;
 
         for (var i = 0; i < colCount; i += 1) {
+            // A round screen's usable width narrows near the top edge -
+            // an even 1/6, 3/6, 5/6 split (colWidth * (i + 0.5)) puts
+            // col1/col3 far enough into the curve at this height to
+            // clip under the bezel. With exactly 3 columns, pull the
+            // outer two in from the true edges instead of splitting the
+            // width evenly; the middle column stays dead center.
             var colCenter = colWidth * (i + 0.5);
+            if (colCount == 3) {
+                if (i == 0) {
+                    colCenter = w * 0.20;
+                } else if (i == 2) {
+                    colCenter = w * 0.80;
+                }
+            }
             dc.setColor(labelColor, Graphics.COLOR_TRANSPARENT);
             dc.drawText(colCenter, labelH, tinyLabelFont, topLabels[i], Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
             dc.setColor(topColors[i], Graphics.COLOR_TRANSPARENT);
