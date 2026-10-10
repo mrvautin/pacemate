@@ -53,6 +53,16 @@
             only. Defaults to black (0).
         -->
         <property id="backgroundMode" type="number">0</property>
+
+        <!--
+            On-device pace alerts (PaceMateFieldView.compute()). Off by
+            default - opt-in. alertBehindThresholdSec is how long
+            continuously behind target pace before the first alert
+            fires; repeat alerts (every 60s) and the 5-minute alert
+            cutoff are fixed in code, not configurable.
+        -->
+        <property id="alertsEnabled" type="boolean">false</property>
+        <property id="alertBehindThresholdSec" type="number">15</property>
     </properties>
 
 </resources>

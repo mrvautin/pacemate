@@ -19,4 +19,9 @@
     <string id="backgroundModeTitle">Background (forces black or white)</string>
     <string id="backgroundBlack">Black - default</string>
     <string id="backgroundWhite">White</string>
+    <string id="alertsEnabledTitle">Pace Alerts (on-device, off by default)</string>
+    <string id="alertThresholdTitle">Alert After Behind Pace For</string>
+    <string id="alertThreshold15">15 seconds</string>
+    <string id="alertThreshold30">30 seconds</string>
+    <string id="alertThreshold60">60 seconds</string>
 </resources>

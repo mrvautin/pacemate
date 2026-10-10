@@ -21,6 +21,8 @@ module PaceMateCalc {
     const PROP_SHOW_FINISH_DELTA = "showFinishDelta";
     const PROP_PACE_SMOOTHING_M = "paceSmoothingM";
     const PROP_BACKGROUND_MODE = "backgroundMode";
+    const PROP_ALERTS_ENABLED = "alertsEnabled";
+    const PROP_ALERT_THRESHOLD_SEC = "alertBehindThresholdSec";
 
     enum {
         UNITS_KM = 0,
@@ -99,6 +101,23 @@ module PaceMateCalc {
     function getBackgroundMode() as Number {
         var v = Properties.getValue(PROP_BACKGROUND_MODE);
         return (v == null) ? BACKGROUND_BLACK : v.toNumber();
+    }
+
+    // On-device pace alerts: off by default (opt-in). Phone-configured
+    // only - see PaceMateFieldView for the alert state machine itself.
+    function getAlertsEnabled() as Boolean {
+        var v = Properties.getValue(PROP_ALERTS_ENABLED);
+        return (v == null) ? false : v;
+    }
+
+    // How many continuous seconds behind target pace before the first
+    // alert fires.
+    function getAlertThresholdSec() as Number {
+        var v = Properties.getValue(PROP_ALERT_THRESHOLD_SEC);
+        if (v == null || v <= 0) {
+            return 15;
+        }
+        return v.toNumber();
     }
 
     // Distance between rolling current-pace checkpoints, in meters -

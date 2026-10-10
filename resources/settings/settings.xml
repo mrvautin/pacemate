@@ -65,6 +65,18 @@
                 <listEntry value="1">@Strings.backgroundWhite</listEntry>
             </settingConfig>
         </setting>
+
+        <setting propertyKey="@Properties.alertsEnabled" title="@Strings.alertsEnabledTitle">
+            <settingConfig type="boolean" />
+        </setting>
+
+        <setting propertyKey="@Properties.alertBehindThresholdSec" title="@Strings.alertThresholdTitle">
+            <settingConfig type="list">
+                <listEntry value="15">@Strings.alertThreshold15</listEntry>
+                <listEntry value="30">@Strings.alertThreshold30</listEntry>
+                <listEntry value="60">@Strings.alertThreshold60</listEntry>
+            </settingConfig>
+        </setting>
     </settings>
 
 </resources>

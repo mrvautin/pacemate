@@ -1,4 +1,5 @@
 import Toybox.Activity;
+import Toybox.Attention;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.WatchUi;
@@ -45,6 +46,16 @@ class PaceMateFieldView extends WatchUi.DataField {
     // the moment each whole unit completes, to start timing the next one.
     private var _unitCheckpointDistanceM as Float = 0.0;
     private var _unitCheckpointTimeSec as Float = 0.0;
+
+    // Pace-alert state machine (see checkPaceAlert()). All in elapsed
+    // activity seconds, reset whenever the runner comes back on pace.
+    private var _behindSinceSec as Float?;
+    private var _lastAlertSec as Float?;
+    private var _alertFiredOnce as Boolean = false;
+    private var _alertCutoff as Boolean = false;
+
+    private const ALERT_REPEAT_SEC = 60;
+    private const ALERT_CUTOFF_SEC = 300;
 
     public function initialize() {
         DataField.initialize();
@@ -99,6 +110,89 @@ class PaceMateFieldView extends WatchUi.DataField {
         _deltaSec = PaceMateCalc.paceDeltaSec(_currentPaceSec, _targetPaceSec);
         _projectedFinishSec = PaceMateCalc.projectedFinishSec(elapsedDistanceM, elapsedTimeSec, _currentPaceSec);
         _finishDeltaSec = PaceMateCalc.finishDeltaSec(_projectedFinishSec);
+
+        if (PaceMateCalc.getAlertsEnabled()) {
+            checkPaceAlert(elapsedTimeSec);
+        }
+    }
+
+    // Pace-alert state machine. Tracks how long the runner has been
+    // continuously behind target pace (_deltaSec > 0, which requires
+    // both current and target pace to be valid - see paceDeltaSec):
+    //   - First alert fires once behind-duration crosses the
+    //     configured threshold (15/30/60s).
+    //   - Further alerts repeat every ALERT_REPEAT_SEC (60s) while
+    //     still behind, so it nags periodically rather than once.
+    //   - Once behind-duration exceeds ALERT_CUTOFF_SEC (5 min), alerts
+    //     stop for the rest of this behind-pace episode - if someone's
+    //     deliberately backed off (hill, walk break), repeated nagging
+    //     stops being useful.
+    //   - Coming back on pace (_deltaSec <= 0) after at least one
+    //     behind-pace alert fired triggers a single recovery alert and
+    //     resets the whole state machine for the next episode.
+    private function checkPaceAlert(elapsedTimeSec as Float?) as Void {
+        if (elapsedTimeSec == null) {
+            return;
+        }
+
+        if (_deltaSec > 0.0) {
+            if (_behindSinceSec == null) {
+                _behindSinceSec = elapsedTimeSec;
+            }
+            var behindDuration = elapsedTimeSec - _behindSinceSec;
+
+            if (_alertCutoff) {
+                return;
+            }
+
+            if (behindDuration > ALERT_CUTOFF_SEC) {
+                _alertCutoff = true;
+                return;
+            }
+
+            var thresholdSec = PaceMateCalc.getAlertThresholdSec();
+            if (!_alertFiredOnce) {
+                if (behindDuration >= thresholdSec) {
+                    fireAlert(false);
+                    _alertFiredOnce = true;
+                    _lastAlertSec = elapsedTimeSec;
+                }
+            } else if (_lastAlertSec != null && (elapsedTimeSec - _lastAlertSec) >= ALERT_REPEAT_SEC) {
+                fireAlert(false);
+                _lastAlertSec = elapsedTimeSec;
+            }
+        } else {
+            if (_alertFiredOnce) {
+                fireAlert(true);
+            }
+            _behindSinceSec = null;
+            _lastAlertSec = null;
+            _alertFiredOnce = false;
+            _alertCutoff = false;
+        }
+    }
+
+    // Pushes the alert view and, where the device has a vibration
+    // motor, a distinct haptic pattern per flavor so the two are
+    // distinguishable without looking at the watch (most of these
+    // devices can't reliably play tones - see Toybox.Attention docs -
+    // so vibration is the only consistently available non-visual cue).
+    private function fireAlert(backOnPace as Boolean) as Void {
+        if (!(WatchUi.DataField has :showAlert)) {
+            return;
+        }
+        var message = backOnPace ? "Back on pace" : "Behind pace";
+        var color = backOnPace ? Graphics.COLOR_GREEN : Graphics.COLOR_RED;
+        WatchUi.DataField.showAlert(new PaceMateAlertView(message, color));
+
+        if (Toybox has :Attention) {
+            if (Attention has :vibrate) {
+                var profiles = backOnPace
+                    ? [new Attention.VibeProfile(50, 400)]
+                    : [new Attention.VibeProfile(100, 200), new Attention.VibeProfile(0, 150), new Attention.VibeProfile(100, 200)];
+                Attention.vibrate(profiles as Array<Attention.VibeProfile>);
+            }
+        }
     }
 
     public function onUpdate(dc as Dc) as Void {
